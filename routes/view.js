@@ -30,12 +30,18 @@ const bcrypt = require('bcrypt');
 
 // home page 
 router.get('/' , protect_view , async (req , res)=>{
-    const products = await Product.find();
-    //console.log(req.user);
-    res.status(200).render('index' , {
-        user: req.user,
-        products
-    });
+    try{
+        const products = await Product.find();
+        //console.log(req.user);
+        res.status(200).render('index' , {
+            user: req.user,
+            products
+        });
+    }catch(err){
+        const message = err.message.split(':')[2];
+        req.flash('info' , `${message}`);
+        res.redirect('/');
+    }
 });
 // product page 
 router.get('/product-detail/:slug' , protect_view , async (req , res)=>{
