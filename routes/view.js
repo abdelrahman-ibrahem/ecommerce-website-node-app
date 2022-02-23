@@ -88,6 +88,7 @@ router.post('/create-message' , async (req , res)=>{
         res.redirect('/');
     }).catch(err=>{
         //console.log(err.message);
+        
         req.flash('info' , `${err.message}`);
         res.redirect('/');
     });
