@@ -16,6 +16,7 @@ const cookieSession = require('cookie-session');
 const dotenv = require('dotenv');
 const xss = require('xss-clean');
 const helmet = require('helmet');
+const hpp = require('hpp');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 
@@ -29,19 +30,20 @@ app.use(express.static(path.join(__dirname , 'public')));
 // handel middelware
 app.use(helmet());
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 if (process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
 }
 app.use(xss());
 app.use(mongoSanitize());
-app.use(compression());
+app.use(hpp());
 //app.use(express.session({ cookie: { maxAge: 60000 }}));
 app.use(cookieSession({
     keys: ['secret1', 'secret2']
 }));
 app.use(flash());
+app.use(compression());
 
 const url ='mongodb+srv://abdelrahman:test1234@ecommerce-website.1pbno.mongodb.net/ecommerce-website?retryWrites=true&w=majority';
 // connect DB connection
