@@ -46,11 +46,13 @@ app.use(flash());
 const url ='mongodb+srv://abdelrahman:test1234@ecommerce-website.1pbno.mongodb.net/ecommerce-website?retryWrites=true&w=majority';
 // connect DB connection
 mongoose.connect(url , { useNewUrlParser: true , useUnifiedTopology: true}).then(()=>{
-    if (process.env.NODE_ENV === 'development')
+    if (process.env.NODE_ENV === 'development'){
         console.log('DATABASE is connect');
+    }
 }).catch(err=>{
-    if (process.env.NODE_ENV === 'development')
+    if (process.env.NODE_ENV === 'development'){
         console.log(`ERROR: ${err.message}`);
+    }
 });
 
 
@@ -71,8 +73,9 @@ app.use((req , res , next)=>{
 });
 
 // run Application
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 app.listen(port , ()=>{
-    if (process.env.NODE_ENV === 'development')
+    if (process.env.NODE_ENV === 'development'){
         console.log('App is Running');
+    }
 });
