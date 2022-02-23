@@ -4,7 +4,8 @@
   "description": "Ecommerce project with node js and Express js and mongoDB",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "startDev": "node index.js"
   },
   "keywords": [],
   "author": "Abdelrahman ibrahem",
