@@ -30,18 +30,14 @@ const bcrypt = require('bcrypt');
 
 // home page 
 router.get('/' , protect_view , async (req , res)=>{
-    try{
-        const products = await Product.find();
-        //console.log(req.user);
-        res.status(200).render('index' , {
-            user: req.user,
-            products
-        });
-    }catch(err){
-        const message = err.message.split(':')[2];
-        req.flash('info' , `${message}`);
-        res.redirect('/');
-    }
+    
+    const products = await Product.find();
+    //console.log(req.user);
+    res.render('index' , {
+        user: req.user,
+        products
+    });
+    
 });
 // product page 
 router.get('/product-detail/:slug' , protect_view , async (req , res)=>{
@@ -459,4 +455,58 @@ router.post('/create-new-product' , protect_view , upload_product_image , async 
         res.redirect('/add-product');
     }
 });
+// for reset password
+router.get('/forget-password' , async (req , res)=>{
+    res.status(200).render('forget-password');
+});
+
+router.post('/forget-password' ,async (req , res)=>{
+    const {email} = req.body;
+    await User.findOne({email}).then(async user=>{
+        if (!user){
+            req.flash('info' , 'This email is not registered');
+            return res.redirect('/forget-password');
+        }
+        const token = jwt.sign({id: user._id , email: email} , 'jwtPrivateKey' , {expiresIn: '12h'});
+        res.redirect(`/reset-password/${user._id}/${token}`);
+        
+    }).catch(err=>{
+        const message = err.message.split(':')[2];
+        req.flash('info' , `${message}`);
+        res.redirect('/forget-password');
+    })
+});
+
+router.get('/reset-password/:id/:token' , async (req, res)=>{
+    res.status(200).render('reset-password');
+});
+router.post('/reset-password/:id/:token' , async (req, res)=>{
+    const { id , token  } = req.params;
+    await User.findById(id).then(async user=>{
+        if (!user){
+            req.flash('info' , 'This email is not registered');
+            return res.redirect(`/reset-password/${user._id}/${token}`);
+        }
+        const check = jwt.verify(token , 'jwtPrivateKey');
+        if (!check){
+            req.flash('info' , 'access denied');
+            return res.redirect(`/reset-password/${user._id}/${token}`);
+        }
+        user.password = req.body.password;
+        user.passwordConfirm = req.body.passwordConfirm;
+        await user.save().then(result=>{
+            req.flash('info' , `Your password is updated`);
+            return res.redirect(`/login`);
+        }).catch(err=>{
+            const message = err.message.split(':')[2];
+            req.flash('info' , `${message}`);
+            res.redirect(`/reset-password/${user._id}/${token}`);
+        });
+    }).catch(err=>{
+        const message = err.message.split(':')[2];
+        req.flash('info' , `${message}`);
+        res.redirect(`/reset-password/${user._id}/${token}`);
+    });
+});
+
 module.exports = router;

@@ -177,3 +177,63 @@ exports.update_profile = async (req , res)=>{
         });
     }
 };
+
+exports.forget_password =  async (req , res)=>{
+    const {email} = req.body;
+    await User.findOne({email}).then(async user=>{
+        if (!user){
+            return res.status(400).json({
+                status: "failed",
+                message: "this email is not found"
+            });
+        }
+        const token = jwt.sign({id: user._id , email: email} , 'jwtPrivateKey' , {expiresIn: '12h'});
+        res.status(200).json({
+            status: "success",
+            message: `please go to this link http://127.0.0.1:3000/reset-password/${user._id}/${token}`
+        });
+    }).catch(err=>{
+        res.status(400).json({
+            status: "failed",
+            message: err.message
+        });
+    })
+};
+
+
+exports.reset_password = async (req , res)=>{
+    const { id , token  } = req.params;
+    await User.findById(id).then(async user=>{
+        if (!user){
+            res.status(400).json({
+                status: "failed",
+                message: "This user is not found"
+            });
+        }
+        const check = jwt.verify(token , 'jwtPrivateKey');
+        if (!check){
+            res.status(400).json({
+                status: "failed",
+                message: "access denied"
+            });
+        }
+        user.password = req.body.password;
+        user.passwordConfirm = req.body.passwordConfirm;
+        await user.save().then(result=>{
+            res.status(200).json({
+                status: "success",
+                result
+            })
+        }).catch(err=>{
+            res.status(400).json({
+                status: "failed",
+                message: err.message
+            });
+        });
+    }).catch(err=>{
+        res.status(400).json({
+            status: "failed",
+            message: err.message
+        });
+    });
+}

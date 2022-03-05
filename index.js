@@ -75,7 +75,7 @@ app.use((req , res , next)=>{
 });
 
 // run Application
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 app.listen(port , ()=>{
     if (process.env.NODE_ENV === 'development'){
         console.log('App is Running');
